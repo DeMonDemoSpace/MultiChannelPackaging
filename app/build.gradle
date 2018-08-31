@@ -1,0 +1,116 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+
+    dexOptions {
+        javaMaxHeapSize "2g"
+        preDexLibraries = false
+    }
+
+    defaultConfig {
+        applicationId "com.demon.multichannelpackaging"
+        minSdkVersion 16
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
+    //配置资源文件路径，可动态指定不同版本资源文件
+    sourceSets {
+        //用各自对应的资源文件路径
+        company.res.srcDirs = ['src/main/res-company']
+        hospital.res.srcDirs = ['src/main/res-hospital']
+        //多渠道打包目录配置
+        debug.setRoot('build-types/debug')
+        release.setRoot('build-types/release')
+    }
+
+    //版本比较多时，自定义导出的APK名称，不同的渠道编出的APK的文件名应该是不一样的
+    //Android插件3.0迁移指南所示：
+    //用all()而不是each()
+    //如果您只更改文件名（这是您的情况），请使用outputFileName而不是output.outputFile
+    applicationVariants.all { variant ->
+        variant.outputs.all() { output ->
+            def flavor = variant.productFlavors[0]
+            def fileName = "${variant.flavorName}_${flavor.versionCode}.${variant.versionName}.apk"
+            /*//默认打包方式，打包到app的子目录下
+            outputFileName = fileName*/
+            //修改打包路径，工程apkpackage文件夹下
+            //也可以在打包时手动选择对应目录
+            def des = output.packageApplication.outputDirectory.toPath().relativize(rootDir.toPath()).toFile()
+            outputFileName = new File("$des/apkpackage", fileName)
+        }
+    }
+    //debug和release版本的签名配置
+    signingConfigs {
+        debug {
+            storeFile file("DeMon.jks")
+            keyAlias = 'key'
+            keyPassword = '123456'
+            storePassword = '123456'
+        }
+
+        release {
+            storeFile file("DeMon.jks")
+            keyAlias = 'key'
+            keyPassword = '123456'
+            storePassword = '123456'
+        }
+
+    }
+    buildTypes {
+        //指定打包时的签名,如果有不同的签名可放在productFlavors不同项目下执行,不过一般都会相同
+        debug {
+            //显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            //apk包名称后缀，用来区分release和debug
+            versionNameSuffix "-debug"
+            //修改包名，能够同时安装debug和release
+            applicationIdSuffix ".debug"
+            //在build.gradle定义资源文件值，可以在程序中像其他string值一样被引用
+            //格式resValue 类型, key（不能与strings.xml文件中的相同）, value（可以直接使用strings.xml文件中的值）
+            resValue "string", "home_text", "@string/text_debug"
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+        }
+        release {
+            //不显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            versionNameSuffix "-release"
+            //修改包名，能够同时安装debug和release
+            applicationIdSuffix ".release"
+            resValue "string", "home_text", "@string/text_release"
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+
+        }
+    }
+    //多渠道配置，可以配置多个，此处只配置两个
+    productFlavors {
+        company {
+            //修改包名，能够同时安装多个渠道版本
+            applicationId "com.demon.multichannelpackaging.company"
+            versionCode 1
+            versionName "0.1"
+            //flavor维度，3.0以上，必须每个渠道版本必须增加，此处以版本号作为维度值
+            //详情见：https://blog.csdn.net/syif88/article/details/75009663/
+            flavorDimensions "versionCode"
+        }
+        hospital {
+            //修改包名，能够同时安装多个渠道版本
+            applicationId "com.demon.multichannelpackaging.hospital"
+            versionCode 1
+            versionName "0.1"
+
+            flavorDimensions "versionCode"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:28.0.0-rc02'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+}

@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Demo(H)</string>
+    <string name="text_release">Hospital_release</string>
+    <string name="text_debug">Hospital_debug</string>
+</resources>

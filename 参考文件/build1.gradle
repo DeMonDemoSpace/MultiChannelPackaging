@@ -1,0 +1,219 @@
+apply plugin: 'com.android.application'
+
+android {
+//    splits {
+//        abi {
+//            enable true
+//            reset()
+//            include 'x86', 'armeabi-v7a'
+//            universalApk true
+//        }
+//    }
+    compileSdkVersion 27
+    buildToolsVersion '27'
+    packagingOptions rootProject.ext.default_android.packagingOptions
+    useLibrary 'org.apache.http.legacy'
+
+    dexOptions {
+        maxProcessCount 4 // this is the default value
+        javaMaxHeapSize "3g"
+    }
+
+
+    defaultConfig {
+        applicationId "com.hq.dis"
+        minSdkVersion 15
+        targetSdkVersion 27
+
+        versionCode 27
+        versionName "1.3.8.1"
+        multiDexEnabled true
+
+        signingConfig signingConfigs.release
+        buildConfigField "org.apache.log4j.Level", "LOG_LEVEL", "org.apache.log4j.Level.WARN"
+        buildConfigField "String", "WeChat_AppID", "\"123456789\""
+        buildConfigField "String", "WeChat_Secret", "\"234567890\""
+        buildConfigField "boolean", "Umeng_Debug", "false"
+
+        buildConfigField "String", "appid", "\"androidB\""
+        buildConfigField "String", "appkey", "\"sdfghjkllfW\""
+
+    }
+
+    buildTypes {
+        debug {
+            versionNameSuffix " _debug"
+            applicationIdSuffix ".deb"
+            minifyEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.debug
+            manifestPlaceholders = [dic_appName: "医联众医生测试版"]
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "CONFIG_PATH", "\"assets/config/debug-config.properties\""
+            buildConfigField "org.apache.log4j.Level", "LOG_LEVEL", "org.apache.log4j.Level.DEBUG"
+//            buildConfigField "boolean", "Umeng_Debug", "true"
+
+        }
+        release {
+            minifyEnabled false
+            shrinkResources false
+            debuggable true
+
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            applicationVariants.all { variant ->
+                if (variant.buildType.name.equals('release')) {
+                    variant.outputs.each { output ->
+                        //这里修改文件名
+                        def fileName = "HOSDoc_${variant.flavorName}_v${variant.versionCode}_v${variant.versionName}.apk"
+                        output.outputFile = new File(rootDir.getAbsolutePath() + '/00发布/医生站移动端', fileName)
+                    }
+                }
+            }
+        }
+    }
+
+    productFlavors {//多渠道打包
+
+        qyzyy {//清远中医院
+            versionCode 33
+            versionName "1.3.7.8"
+            manifestPlaceholders = [dic_appName: "医联众医生版"]
+            buildConfigField "String", "CONFIG_PATH", "\"assets/config/qyzyy-config.properties\""
+        }
+
+        stzxyy {//汕头中心医院d
+            versionCode 57
+            versionName "1.6.4"
+            manifestPlaceholders = [dic_appName: "医联众医生版"]
+            buildConfigField "String", "CONFIG_PATH", "\"assets/config/stzxyy-config.properties\""
+            buildConfigField "boolean", "Umeng_Debug", "false"
+        }
+
+        nhls {//南海里水人民医院
+            versionCode 6
+            versionName "1.5.5"
+            manifestPlaceholders = [dic_appName: "医联众医生版"]
+//            buildConfigField "String", "CONFIG_PATH", "\"assets/config/nhls-config.properties\""
+            buildConfigField "String", "CONFIG_PATH", "\"assets/config/nhls-config-demo.properties\""
+            buildConfigField "boolean", "Umeng_Debug", "false"
+
+        }
+    }
+
+    sourceSets {
+        debug {
+
+        }
+        main {
+
+            res.srcDirs =
+                    [
+                            'src/main/res/layouts/dev',
+                            'src/main/res/layouts/person',
+                            'src/main/res/layouts/lockview',
+                            'src/main/res/layouts/common',
+                            'src/main/res/layouts/firstlogin',
+                            'src/main/res/layouts/base',
+                            'src/main/res/layouts/diagnose_edit',
+                            'src/main/res/layouts/pdf',
+                            'src/main/res/layouts/family',
+                            'src/main/res/layouts',
+                            'src/main/res'
+                    ]
+            assets.srcDirs =
+                    [
+                            'src/main/assets'
+                    ]
+        }
+        qyzyy {
+            manifest.srcFile 'src/qyzyy/QYZYY_AndroidManifest.xml'
+
+        }
+        stzxyy {
+            manifest.srcFile 'src/stzxyy/STZXYY_AndroidManifest.xml'
+        }
+        nhls {
+            manifest.srcFile 'src/nhls/NHLS_AndroidManifest.xml'
+        }
+    }
+
+
+}
+
+
+dependencies {
+    def version = '24.0.0'
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.android.support:support-v4:' + version
+    compile 'com.android.support:design:' + version
+    compile 'com.android.support:appcompat-v7:' + version
+    compile 'com.android.support:support-annotations:' + version
+    compile 'com.liulishuo.okdownload:okdownload:1.0.2'
+    //    compile project(':mupdf_library')
+
+    compile(name: 'AndroidTreeView', ext: 'aar')
+    compile(name: 'Autobahn', ext: 'aar')
+    compile(name: 'CommonModule', ext: 'aar')
+    compile(name: 'EAIModule', ext: 'aar')
+    compile(name: 'Framework', ext: 'aar')
+    compile(name: 'MsgModule', ext: 'aar')
+    compile(name: 'NumberProgressBar', ext: 'aar')
+    compile(name: 'PermissionHelper', ext: 'aar')
+    compile(name: 'PinchImageView', ext: 'aar')
+    compile(name: 'PullToReFresh', ext: 'aar')
+    compile(name: 'ViewPagerIndicator', ext: 'aar')
+    compile(name: 'autolayout-1.4.3', ext: 'aar')
+    compile(name: 'ExpandableTextView', ext: 'aar')
+    compile(name: 'popu-library', ext: 'aar')
+    compile(name: 'MkLoder', ext: 'aar')
+    compile(name: 'mupdf_library', ext: 'aar')
+    compile(name: 'PhotoPicker', ext: 'aar')
+    compile(name: 'album', ext: 'aar')
+    compile(name: 'pickerview', ext: 'aar')
+    compile(name: 'flowlayout', ext: 'aar')
+    compile(name: 'recyclerview-swipe-1.0.2', ext: 'aar')
+    compile(name: 'netca_sdk', ext: 'aar')
+//    compile project(':PhotoPicker')
+//    compile(name: 'okdownload',ext:'aar')
+//    compile(name: 'pdf-library', ext: 'aar')
+//    compile(name: 'pulltorefreshlibrary',ext:'aar')
+
+
+    compile fileTree(dir: rootProject.ext.lib_jar_dir, include: [
+            'butterknife-7.0.1.jar',
+            'eventbus-3.0.0.jar',
+            'zhy_treeview.jar',
+            'adapter-rxjava-2.1.0.jar',
+            'converter-gson-2.1.0.jar',
+            'gson-2.7.jar',
+            'okhttp-2.4.0.jar',
+            'okhttp-3.9.0.jar',
+            'okio-1.11.0.jar',
+            'picasso-2.5.2.jar',
+            'retrofit-2.1.0.jar',
+            'rxandroid.jar',
+            'mobilehis-bean-1.0.0.jar',
+            'rxjava-1.1.6.jar',
+            'lite-orm-1.9.2.jar',
+            'pgyer_sdk_2.8.1.jar',
+            'glide-3.7.0.jar',
+            'nineoldandroids-2.4.0.jar',
+            'flyway-core-4.0.3.jar',
+            'sqldroid-1.0.3.jar',
+            'pinyin4j-2.5.0.jar',
+            'mpandroidchartlibrary-2-2-4.jar',
+            'fastjson-1.1.56.android.jar'
+    ])
+    compile fileTree(dir: rootProject.ext.lib_jar_dir + '/Umeng', include: [
+            'open_sdk_r5781.jar',
+            'SocialSDK_QQ_Full.jar',
+            'SocialSDK_Sina_Full.jar',
+            'SocialSDK_WeChat_Simplify.jar',
+            'umeng_social_api.jar',
+            'umeng_social_net.jar',
+            'umeng_social_tool.jar',
+            'weiboSDKCore_3.1.4.jar'
+    ])
+
+
+}

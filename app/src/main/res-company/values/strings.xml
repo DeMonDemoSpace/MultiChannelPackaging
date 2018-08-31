@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Demo(C)</string>
+    <string name="text_release">Company_release</string>
+    <string name="text_debug">Company_debug</string>
+</resources>

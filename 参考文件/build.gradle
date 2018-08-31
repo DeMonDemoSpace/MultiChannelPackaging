@@ -1,0 +1,119 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '26.0.0'
+
+    dexOptions {
+        incremental false
+        javaMaxHeapSize "2g"
+        preDexLibraries = false
+//        incremental true
+    }
+
+    //签名文件如果不加，部分平台的授权会受到影响
+    signingConfigs {
+        debug {
+            storeFile file('Key.store')
+            storePassword "123456"
+            keyAlias "key"
+            keyPassword "123456"
+        }
+        release {
+            storeFile file('Key.store')
+            storePassword "123456"
+            keyAlias "key"
+            keyPassword "123456"
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.hq.nurse"
+        minSdkVersion 19
+        targetSdkVersion 26
+        versionCode 3
+        versionName "0.3"
+        multiDexEnabled true
+        signingConfig signingConfigs.release
+        buildConfigField "String", "LOG_MAIN_TAG", "\"NurseApp\""
+        buildConfigField "com.lf.bean.PDAType", "PDA_TYPE", "com.lf.bean.PDAType.IData50"
+        buildConfigField "String", "DEFAULT_IP", "\"http://0.0.0.0\""
+        vectorDrawables.useSupportLibrary = true
+    }
+    buildTypes {
+        debug {
+            // apk包名称后缀，用来区分release和debug
+            versionNameSuffix "_debug"
+            applicationIdSuffix ".debug"
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            applicationVariants.all { variant ->
+                if (variant.buildType.name.equals('release')) {
+                    variant.outputs.each { output ->
+                        def flavor = variant.productFlavors[0]
+                        //这里修改文件名
+//                        def fileName = "HQNurse_${variant.flavorName}_v${flavor.versionCode}_v${flavor.versionName}.apk"
+                        def fileName = "android_${flavor.versionCode}.${variant.flavorName}.apk"
+                        output.outputFile = new File(projectDir.getAbsolutePath() + '/发布', fileName)
+                    }
+                }
+            }
+        }
+    }
+
+    productFlavors {//多渠道打包
+        hq {//公司
+            applicationId "com.hq.nurse.main"
+            versionCode 3
+            versionName "0.3"
+        }
+        qyzyy {//清远中医院
+            applicationId "com.hq.nurse.qyzyy"
+            versionCode 5
+            versionName "0.5"
+            buildConfigField "String", "DEFAULT_IP", "\"http://0.0.0.0\""
+        }
+        book {//笔记本
+            applicationId "com.hq.nurse.book"
+            versionCode 3
+            versionName "0.3"
+            buildConfigField "String", "DEFAULT_IP", "\"http://0.0.0.0\""
+            buildConfigField "com.lf.bean.PDAType", "PDA_TYPE", "com.lf.bean.PDAType.IData50"
+        }
+    }
+
+}
+
+repositories {
+    maven { url "https://jitpack.io" }
+    flatDir {
+        dirs 'libs'   // aar目录
+    }
+}
+
+dependencies {
+    compile(name: 'PDAScan', ext: 'aar')
+    compile files('libs/eventbus-3.0.0.jar')
+    compile files('libs/net/okhttp-3.9.0.jar')
+    compile files('libs/net/okio-1.11.0.jar')
+    compile files('libs/net/retrofit-2.1.0.jar')
+    compile files('libs/net/rxandroid.jar')
+    compile files('libs/net/rxjava-1.1.6.jar')
+    compile files('libs/net/adapter-rxjava-2.1.0.jar')
+    compile files('libs/net/converter-gson-2.1.0.jar')
+    compile files('libs/mq/amqp-client-4.0.2.jar')
+    compile files('libs/mq/slf4j-api-1.7.21.jar')
+    compile files('libs/mq/slf4j-simple-1.7.22.jar')
+    compile files('libs/java-unrar-decryption-supported-20120613.jar')
+    compile files('libs/ant.jar')
+    compile 'com.android.support:appcompat-v7:26.0.0-alpha1'
+    compile 'com.github.lzyzsd:jsbridge:1.0.4'
+    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'com.android.support:support-v4:26.0.0-alpha1'
+    compile 'com.android.support:support-vector-drawable:26.0.0-alpha1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+}
